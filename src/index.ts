@@ -4,7 +4,7 @@ export default {
 
     // 1. ตั้งค่า CORS Headers (สำคัญมาก เพื่อให้ Cloudflare Pages ดึงข้อมูลได้)
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "*", // หรือระบุโดเมนเว็บของคุณแทน * เพื่อความปลอดภัย
+      "Access-Control-Allow-Origin": "https://videogu.pages.dev", // หรือระบุโดเมนเว็บของคุณแทน * เพื่อความปลอดภัย
       "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
