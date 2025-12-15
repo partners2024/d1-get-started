@@ -26,7 +26,7 @@ export default {
     }
 
     // API เดิม (ตัวอย่าง)
-    if (url.pathname === "/api/beverages") {
+    if (url.pathname === "/api/Users") {
       const { results } = await env.DB.prepare(
         "SELECT * FROM Customers WHERE CompanyName = ?"
       )
