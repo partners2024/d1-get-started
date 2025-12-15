@@ -27,10 +27,10 @@ export default {
         }
 
         // --- API 2: ดึงผู้ใช้งาน (แก้ไขให้ถูกต้อง) ---
-        case "/api/users": {
+        case "/api/short": {
           // แก้จาก videos เป็น Users (คุณต้องสร้างตาราง Users ใน D1 ก่อนนะ)
           const { results } = await env.DB.prepare(
-            "SELECT * FROM Users" 
+            "SELECT * FROM short" 
           ).all();
           return Response.json(results, { headers: corsHeaders });
         }
