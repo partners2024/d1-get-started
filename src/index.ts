@@ -24,9 +24,18 @@ export default {
         return Response.json({ error: err.message }, { status: 500, headers: corsHeaders });
       }
     }
+    if (url.pathname === "/api/users") {
+      try {
+        // ดึงข้อมูลทั้งหมดจากตาราง videos
+        const { results } = await env.DB.prepare("SELECT * FROM videos ORDER BY id DESC").all();
+        return Response.json(results, { headers: corsHeaders });
+      } catch (err) {
+        return Response.json({ error: err.message }, { status: 500, headers: corsHeaders });
+      }
+    }
 
     // API เดิม (ตัวอย่าง)
-    if (url.pathname === "/api/Users") {
+    if (url.pathname === "/api/customers") {
       const { results } = await env.DB.prepare(
         "SELECT * FROM Customers WHERE CompanyName = ?"
       )
