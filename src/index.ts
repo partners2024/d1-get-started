@@ -1,49 +1,40 @@
-import { D1Database } from '@cloudflare/workers-types';
-
-export interface Env {
-	VDB: D1Database;
-	ASSETS: Fetcher;
-}
-
 export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		const url = new URL(request.url);
+  async fetch(request, env): Promise<Response> {
+    const url = new URL(request.url);
 
-		// ตั้งค่า CORS เพื่อให้หน้าเว็บอื่น (หรือ localhost) ดึงข้อมูลได้
-		const corsHeaders = {
-			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
-			"Access-Control-Allow-Headers": "Content-Type",
-		};
+    // 1. ตั้งค่า CORS Headers (สำคัญมาก เพื่อให้ Cloudflare Pages ดึงข้อมูลได้)
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*", // หรือระบุโดเมนเว็บของคุณแทน * เพื่อความปลอดภัย
+      "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    };
 
-		// กรณี Preflight Request
-		if (request.method === "OPTIONS") {
-			return new Response(null, { headers: corsHeaders });
-		}
+    // 2. จัดการ Preflight Request (OPTIONS)
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: corsHeaders });
+    }
 
-		// API Endpoint สำหรับดึงวิดีโอ
-		if (url.pathname === "/api/videos") {
-			try {
-				// คำสั่ง SQL ดึงข้อมูล
-				const { results } = await env.VDB.prepare(
-					"SELECT * FROM videos ORDER BY id DESC"
-				).all();
+    // 3. API สำหรับดึงข้อมูลวิดีโอ
+    if (url.pathname === "/api/videos") {
+      try {
+        // ดึงข้อมูลทั้งหมดจากตาราง videos
+        const { results } = await env.DB.prepare("SELECT * FROM videos ORDER BY id DESC").all();
+        return Response.json(results, { headers: corsHeaders });
+      } catch (err) {
+        return Response.json({ error: err.message }, { status: 500, headers: corsHeaders });
+      }
+    }
 
-				return new Response(JSON.stringify(results), {
-					headers: {
-						...corsHeaders,
-						"Content-Type": "application/json",
-					},
-				});
-			} catch (e: any) {
-				return new Response(JSON.stringify({ error: e.message }), {
-					status: 500,
-					headers: corsHeaders,
-				});
-			}
-		}
+    // API เดิม (ตัวอย่าง)
+    if (url.pathname === "/api/beverages") {
+      const { results } = await env.DB.prepare(
+        "SELECT * FROM Customers WHERE CompanyName = ?"
+      )
+        .bind("Bs Beverages")
+        .all();
+      return Response.json(results, { headers: corsHeaders });
+    }
 
-		// ถ้าไม่ใช่ API ให้แสดงหน้าเว็บปกติ (Frontend)
-		return env.ASSETS.fetch(request);
-	},
-};
+    return new Response("Not Found", { status: 404, headers: corsHeaders });
+  },
+} satisfies ExportedHandler<Env>;
